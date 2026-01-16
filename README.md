@@ -1,4 +1,4 @@
-# Mini gestion de parc
+# Projet : ransomware pédagogique IPSSI
 
 ## Lancer le serveur
 ```
