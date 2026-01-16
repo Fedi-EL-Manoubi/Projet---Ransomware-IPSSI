@@ -1,5 +1,5 @@
 # Projet : ransomware pédagogique IPSSI
-
+Groupe: Projet effectué tout seul (solo)
 ## 1. Présentation générale
 Ce projet a été réalisé dans le cadre du module "Malware et sécurité offensive". L'objectif est de simuler le fonctionnement d'un ransomware moderne (chiffrement, exfiltration de clé, contrôle à distance) dans un environnement de laboratoire sécurisé.
 
